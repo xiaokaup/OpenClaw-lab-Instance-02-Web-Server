@@ -1,84 +1,735 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenClaw Lab — Instance 02</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-      color: #c9d1d9;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 12px;
-      padding: 48px;
-      max-width: 520px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    h1 {
-      font-size: 2rem;
-      color: #58a6ff;
-      margin-bottom: 8px;
-    }
-    .badge {
-      display: inline-block;
-      background: #1f6feb22;
-      color: #58a6ff;
-      border: 1px solid #1f6feb44;
-      border-radius: 20px;
-      padding: 4px 16px;
-      font-size: 0.85rem;
-      margin-bottom: 24px;
-    }
-    p {
-      color: #8b949e;
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
-    .links a {
-      display: inline-block;
-      color: #58a6ff;
-      text-decoration: none;
-      padding: 8px 16px;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      margin: 4px;
-      transition: all 0.2s;
-    }
-    .links a:hover {
-      background: #1f6feb22;
-      border-color: #58a6ff;
-    }
-    footer {
-      margin-top: 32px;
-      font-size: 0.75rem;
-      color: #484f58;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>价值链农安险 AI 管理系统 — MVP Demo</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --danger: #d93025;
+    --warning: #e37400;
+    --success: #188038;
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #202124;
+    --muted: #5f6368;
+    --border: #dadce0;
+    --shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; background: var(--bg); color: var(--text); }
+
+  .header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .header .badge { background: rgba(255,255,255,.2); padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+  .header .subtitle { font-size: 13px; opacity: .8; margin-left: auto; }
+
+  .nav { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 24px; overflow-x: auto; }
+  .nav button { padding: 12px 20px; border: none; background: none; cursor: pointer; font-size: 14px; color: var(--muted); border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap; }
+  .nav button:hover { color: var(--primary); background: #f0f6ff; }
+  .nav button.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+
+  .content { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--card); border-radius: 8px; padding: 16px; box-shadow: var(--shadow); }
+  .stat-card .label { font-size: 12px; color: var(--muted); }
+  .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+  .stat-card .delta { font-size: 12px; margin-top: 4px; }
+  .stat-card.red .value { color: var(--danger); }
+  .stat-card.orange .value { color: var(--warning); }
+  .stat-card.green .value { color: var(--success); }
+  .stat-card.blue .value { color: var(--primary); }
+
+  .card { background: var(--card); border-radius: 8px; box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
+  .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+  .card-body { padding: 18px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  tr:hover { background: #f8f9ff; }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover { background: #eef3ff; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .tag-red { background: #fce8e6; color: var(--danger); }
+  .tag-orange { background: #fef7e0; color: var(--warning); }
+  .tag-green { background: #e6f4ea; color: var(--success); }
+  .tag-blue { background: #e8f0fe; color: var(--primary); }
+  .tag-gray { background: #f1f3f4; color: var(--muted); }
+
+  .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; border-left: 4px solid; display: flex; justify-content: space-between; align-items: flex-start; }
+  .alert-red { background: #fce8e6; border-color: var(--danger); }
+  .alert-orange { background: #fef7e0; border-color: var(--warning); }
+  .alert-yellow { background: #feefe0; border-color: #ea8600; }
+  .alert .alert-time { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.4); z-index: 1000; justify-content: center; align-items: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: white; border-radius: 12px; width: 90%; max-width: 680px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+  .modal-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 16px; }
+  .modal-close { width: 32px; height: 32px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; font-size: 18px; color: var(--muted); display: flex; align-items: center; justify-content: center; }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+
+  .btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-outline { background: white; color: var(--primary); border: 1px solid var(--primary); }
+  .btn-outline:hover { background: #e8f0fe; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-sm { padding: 4px 12px; font-size: 12px; }
+
+  .radar-chart-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-box { position: relative; height: 240px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .detail-item { padding: 10px; background: var(--bg); border-radius: 6px; }
+  .detail-item .k { font-size: 11px; color: var(--muted); }
+  .detail-item .v { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+  .score-ring { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; margin: 0 auto 12px; }
+  .score-ring .num { font-size: 36px; font-weight: 700; }
+  .score-ring .lbl { font-size: 12px; opacity: .8; }
+  .score-ring.green { background: #e6f4ea; color: var(--success); }
+  .score-ring.orange { background: #fef7e0; color: var(--warning); }
+  .score-ring.red { background: #fce8e6; color: var(--danger); }
+
+  .bar-group { margin-bottom: 10px; }
+  .bar-group .bar-label { font-size: 12px; color: var(--muted); margin-bottom: 3px; display: flex; justify-content: space-between; }
+  .bar-group .bar-track { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .bar-group .bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 48px; opacity: .3; }
+  .empty-state p { margin-top: 8px; font-size: 14px; }
+
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+  @media (max-width: 768px) {
+    .radar-chart-wrap { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .content { padding: 12px; }
+  }
+
+  /* Tab content */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .page-tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--bg); padding: 4px; border-radius: 8px; }
+  .page-tabs button { flex: 1; padding: 8px 12px; border: none; background: none; cursor: pointer; border-radius: 6px; font-size: 13px; color: var(--muted); transition: all .15s; }
+  .page-tabs button:hover { background: rgba(0,0,0,.04); }
+  .page-tabs button.active { background: white; color: var(--primary); font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+  .sim-btn { background: #fef7e0; color: var(--warning); border: 1px dashed var(--warning); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all .15s; }
+  .sim-btn:hover { background: #fef0c0; }
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>🦞 OpenClaw Lab</h1>
-    <div class="badge">Instance 02 — Web Server</div>
-    <p>
-      一个由 OpenClaw 驱动的自动化 Web 服务实例。<br>
-      通过 GitHub Pages 部署，由 AI Agent 维护更新。
-    </p>
-    <div class="links">
-      <a href="https://github.com/xiaokaup/OpenClaw-lab-Instance-02-Web-Server">📦 Repository</a>
+
+<!-- Header -->
+<div class="header">
+  <h1>🌾 知田心安 · 农安险 AI 管理平台</h1>
+  <span class="badge">MVP v0.1</span>
+  <span class="subtitle">世行项目 · 价值链农产品质量安全责任保险试点</span>
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button class="active" onclick="switchModule('module1',this)">📋 投保主体入库管理</button>
+  <button onclick="switchModule('module2',this)">📊 事前风险评估</button>
+  <button onclick="switchModule('module3',this)">🚨 事中风险监测与预警</button>
+</div>
+
+<!-- Main Content -->
+<div class="content">
+
+  <!-- Module 1: 投保主体入库管理 -->
+  <div id="module1" class="tab-content active">
+    <div class="stats-row">
+      <div class="stat-card blue"><div class="label">总投保主体</div><div class="value" id="m1-total">0</div></div>
+      <div class="stat-card green"><div class="label">已入库</div><div class="value" id="m1-active">0</div></div>
+      <div class="stat-card orange"><div class="label">待审核</div><div class="value" id="m1-pending">0</div></div>
+      <div class="stat-card red"><div class="label">已驳回</div><div class="value" id="m1-rejected">0</div></div>
     </div>
-    <footer>
-      Deployed via GitHub Pages · Powered by OpenClaw
-    </footer>
+
+    <div class="card">
+      <div class="card-header">
+        <span>投保主体列表</span>
+        <div>
+          <input type="text" id="search-input" placeholder="🔍 搜索主体名称..." style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;width:200px;margin-right:8px;" oninput="renderSubjectTable()">
+          <button class="btn btn-primary btn-sm" onclick="showAddSubjectModal()">+ 新增主体</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0;overflow-x:auto;">
+        <table><thead><tr>
+          <th>主体名称</th><th>类型</th><th>品种</th><th>所在地</th><th>风险等级</th><th>入库状态</th><th>操作</th>
+        </tr></thead><tbody id="subject-table-body"></tbody></table>
+      </div>
+    </div>
   </div>
+
+  <!-- Module 2: 事前风险评估 -->
+  <div id="module2" class="tab-content">
+    <div class="stats-row">
+      <div class="stat-card green"><div class="label">低风险主体 🟢</div><div class="value" id="m2-low">0</div></div>
+      <div class="stat-card orange"><div class="label">中风险主体 🟡</div><div class="value" id="m2-mid">0</div></div>
+      <div class="stat-card red"><div class="label">高风险主体 🔴</div><div class="value" id="m2-high">0</div></div>
+      <div class="stat-card blue"><div class="label">平均风险评分</div><div class="value" id="m2-avg">0</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span>风险评估一览</span>
+        <select id="risk-filter" onchange="renderRiskTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <option value="all">全部等级</option>
+          <option value="high">高风险</option>
+          <option value="mid">中风险</option>
+          <option value="low">低风险</option>
+        </select>
+      </div>
+      <div class="card-body" style="padding:0;overflow-x:auto;">
+        <table><thead><tr>
+          <th>主体名称</th><th>品种</th><th>风险评分</th><th>等级</th><th>投入品</th><th>检测合格率</th><th>生产环境</th><th>操作</th>
+        </tr></thead><tbody id="risk-table-body"></tbody></table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="card">
+        <div class="card-header">📈 风险等级分布</div>
+        <div class="card-body"><div class="chart-box"><canvas id="riskDistChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">📊 分品种平均风险</div>
+        <div class="card-body"><div class="chart-box"><canvas id="riskProductChart"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module 3: 事中风险监测与预警 -->
+  <div id="module3" class="tab-content">
+    <div class="stats-row">
+      <div class="stat-card red"><div class="label">一级预警（严重）</div><div class="value" id="m3-l1">0</div></div>
+      <div class="stat-card orange"><div class="label">二级预警（中等）</div><div class="value" id="m3-l2">0</div></div>
+      <div class="stat-card" style="border-left:3px solid #ea8600;"><div class="label">三级预警（关注）</div><div class="value" id="m3-l3">0</div></div>
+      <div class="stat-card blue"><div class="label">本日检测批次</div><div class="value" id="m3-tests">0</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+      <div class="card">
+        <div class="card-header">
+          <span>🚨 实时预警列表</span>
+          <button class="sim-btn" onclick="simulateAlert()">⚡ 模拟新预警</button>
+        </div>
+        <div class="card-body" id="alert-list">
+          <div class="empty-state"><div class="icon">✅</div><p>暂无预警，一切正常</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">📉 风险趋势</div>
+        <div class="card-body"><div class="chart-box" style="height:220px;"><canvas id="trendChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">⚡ 最近检测数据（模拟实时推送）</div>
+      <div class="card-body" style="padding:0;overflow-x:auto;">
+        <table><thead><tr>
+          <th>时间</th><th>主体</th><th>品种</th><th>检测项目</th><th>检测值</th><th>标准限值</th><th>结果</th>
+        </tr></thead><tbody id="test-data-table"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-title">详情</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const SUBJECTS = [
+  { id: 'S001', name: '从化绿源蔬菜专业合作社', type: '合作社', product: '蔬菜', region: '广州从化', riskScore: 85, riskLevel: 'low', status: 'active',
+    dimensions: { inputs:88, passRate:90, env:82, mgmt:80, scale:85 },
+    desc: '成立于2018年，占地120亩，主营叶菜类种植。已建立生产记录制度。' },
+  { id: 'S002', name: '三水刘氏生猪养殖场', type: '家庭农场', product: '生猪', region: '佛山三水', riskScore: 55, riskLevel: 'high', status: 'active',
+    dimensions: { inputs:50, passRate:60, env:62, mgmt:45, scale:58 },
+    desc: '存栏量800头，近6个月检出1次磺胺类超标，休药期执行不规范。' },
+  { id: 'S003', name: '新会荔园生态农业有限公司', type: '企业', product: '荔枝', region: '江门新会', riskScore: 92, riskLevel: 'low', status: 'active',
+    dimensions: { inputs:95, passRate:93, env:90, mgmt:88, scale:92 },
+    desc: '种植面积500亩，绿色食品认证，全程可追溯。' },
+  { id: 'S004', name: '博罗县丰产水产合作社', type: '合作社', product: '水产', region: '惠州博罗', riskScore: 72, riskLevel: 'mid', status: 'active',
+    dimensions: { inputs:78, passRate:75, env:60, mgmt:70, scale:75 },
+    desc: '养殖水面200亩，以草鱼、罗非鱼为主，产地水源有轻微污染史。' },
+  { id: 'S005', name: '高要区李大叔菜园', type: '农户', product: '蔬菜', region: '肇庆高要', riskScore: 65, riskLevel: 'mid', status: 'pending',
+    dimensions: { inputs:60, passRate:70, env:68, mgmt:55, scale:72 },
+    desc: '散户种植5亩，生产记录不完整，建议建立农事档案。' },
+  { id: 'S006', name: '从化谭氏荔枝园', type: '农户', product: '荔枝', region: '广州从化', riskScore: 78, riskLevel: 'mid', status: 'active',
+    dimensions: { inputs:80, passRate:82, env:75, mgmt:70, scale:83 },
+    desc: '种植面积30亩，近年加入合作社统一管理。' },
+  { id: 'S007', name: '三水绿丰蔬菜基地', type: '企业', product: '蔬菜', region: '佛山三水', riskScore: 45, riskLevel: 'high', status: 'active',
+    dimensions: { inputs:35, passRate:50, env:55, mgmt:40, scale:45 },
+    desc: '2026年Q1检测发现毒死蜱超标1次，被警告整改中。' },
+  { id: 'S008', name: '新会罗氏水产养殖场', type: '家庭农场', product: '水产', region: '江门新会', riskScore: 88, riskLevel: 'low', status: 'active',
+    dimensions: { inputs:90, passRate:85, env:92, mgmt:86, scale:87 },
+    desc: '养殖面积50亩，已通过水产健康养殖示范场认证。' },
+  { id: 'S009', name: '博罗县泰丰生猪合作社', type: '合作社', product: '生猪', region: '惠州博罗', riskScore: 62, riskLevel: 'mid', status: 'rejected',
+    dimensions: { inputs:70, passRate:65, env:58, mgmt:55, scale:62 },
+    desc: '近3年有环保处罚记录，暂时不符合入库条件。' },
+  { id: 'S010', name: '高要供销社联合农场', type: '集体经济组织', product: '蔬菜', region: '肇庆高要', riskScore: 82, riskLevel: 'low', status: 'active',
+    dimensions: { inputs:85, passRate:80, env:84, mgmt:82, scale:79 },
+    desc: '村集体经营，带动周边50户农户，生产管理规范。' },
+];
+
+// Test data log
+let testLogs = [
+  { time: '2026-07-04 15:30', subject: '三水刘氏生猪养殖场', prod: '生猪', item: '磺胺类', value: '85 μg/kg', limit: '100 μg/kg', result: 'pass' },
+  { time: '2026-07-04 14:10', subject: '从化绿源蔬菜专业合作社', prod: '菜心', item: '毒死蜱', value: '0.05 mg/kg', limit: '0.1 mg/kg', result: 'pass' },
+  { time: '2026-07-04 11:20', subject: '三水绿丰蔬菜基地', prod: '白菜', item: '毒死蜱', value: '0.08 mg/kg', limit: '0.1 mg/kg', result: 'pass' },
+  { time: '2026-07-04 09:45', subject: '新会荔园生态农业有限公司', prod: '荔枝', item: '吡虫啉', value: '0.15 mg/kg', limit: '0.5 mg/kg', result: 'pass' },
+  { time: '2026-07-03 16:30', subject: '博罗县丰产水产合作社', prod: '草鱼', item: '孔雀石绿', value: '0.3 μg/kg', limit: '1 μg/kg', result: 'pass' },
+];
+
+// Alerts
+let alerts = [
+  { level: 2, subject: '三水绿丰蔬菜基地', product: '白菜', item: '毒死蜱', value: '0.08 mg/kg', limit: '0.1 mg/kg', note: '已连续2次检测值呈上升趋势，接近限值80%', time: '2026-07-04 11:20:00' },
+  { level: 3, subject: '博罗县丰产水产合作社', product: '草鱼', item: '孔雀石绿', value: '0.3 μg/kg', limit: '1 μg/kg', note: '检出禁用物质趋势，建议增加检测频率', time: '2026-07-03 16:30:00' },
+];
+
+const riskLevelMap = { high: '🔴 高风险', mid: '🟡 中风险', low: '🟢 低风险' };
+const statusMap = { active: {label:'已入库',cls:'tag-green'}, pending:{label:'待审核',cls:'tag-orange'}, rejected:{label:'已驳回',cls:'tag-red'} };
+const typeMap = { inputs:'投入品使用', passRate:'检测合格率', env:'生产环境', mgmt:'管理制度', scale:'规模经验' };
+
+// Charts
+let riskDistChart, riskProductChart, trendChart;
+
+// ============================================================
+// M1: Subject Management
+// ============================================================
+function renderSubjectTable() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const filtered = SUBJECTS.filter(s => s.name.toLowerCase().includes(q));
+  const tbody = document.getElementById('subject-table-body');
+  tbody.innerHTML = filtered.map(s => {
+    const st = statusMap[s.status];
+    const rl = riskLevelMap[s.riskLevel];
+    return `<tr class="clickable" onclick="showSubjectDetail('${s.id}')">
+      <td><strong>${s.name}</strong></td>
+      <td>${s.type}</td>
+      <td>${s.product}</td>
+      <td>${s.region}</td>
+      <td><span class="tag tag-${s.riskLevel==='high'?'red':s.riskLevel==='mid'?'orange':'green'}">${rl}</span></td>
+      <td><span class="tag ${st.cls}">${st.label}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showSubjectDetail('${s.id}')">查看</button></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('m1-total').textContent = SUBJECTS.length;
+  document.getElementById('m1-active').textContent = SUBJECTS.filter(s => s.status === 'active').length;
+  document.getElementById('m1-pending').textContent = SUBJECTS.filter(s => s.status === 'pending').length;
+  document.getElementById('m1-rejected').textContent = SUBJECTS.filter(s => s.status === 'rejected').length;
+}
+
+function showSubjectDetail(id) {
+  const s = SUBJECTS.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('modal-title').textContent = `📋 ${s.name}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="k">主体编号</div><div class="v">${s.id}</div></div>
+      <div class="detail-item"><div class="k">主体类型</div><div class="v">${s.type}</div></div>
+      <div class="detail-item"><div class="k">主营品种</div><div class="v">${s.product}</div></div>
+      <div class="detail-item"><div class="k">所在地</div><div class="v">${s.region}</div></div>
+      <div class="detail-item"><div class="k">风险等级</div><div class="v">${riskLevelMap[s.riskLevel]}</div></div>
+      <div class="detail-item"><div class="k">入库状态</div><div class="v">${statusMap[s.status].label}</div></div>
+      <div class="detail-item" style="grid-column:1/-1;"><div class="k">简介</div><div class="v">${s.desc}</div></div>
+    </div>
+    <h4 style="margin:16px 0 10px;font-size:14px;">📊 风险评估雷达</h4>
+    <div class="chart-box" style="height:200px;"><canvas id="detailRadar"></canvas></div>
+  `;
+  document.getElementById('modal-footer').innerHTML = `
+    ${s.status === 'pending' ? '<button class="btn btn-success btn-sm" onclick="approveSubject(\''+s.id+'\')">✅ 审核通过</button><button class="btn btn-danger btn-sm" onclick="rejectSubject(\''+s.id+'\')">❌ 驳回</button>' : ''}
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button>
+  `;
+  document.getElementById('modal').classList.add('show');
+  setTimeout(() => {
+    const ctx = document.getElementById('detailRadar');
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: Object.values(typeMap),
+        datasets: [{
+          data: Object.values(s.dimensions),
+          backgroundColor: 'rgba(26,115,232,.15)',
+          borderColor: '#1a73e8',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#1a73e8',
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }, 50);
+}
+
+function approveSubject(id) {
+  const s = SUBJECTS.find(x => x.id === id);
+  if (s) { s.status = 'active'; }
+  closeModal(); renderSubjectTable();
+  alert(`✅ ${s.name} 已审核通过，正式入库！`);
+}
+
+function rejectSubject(id) {
+  const s = SUBJECTS.find(x => x.id === id);
+  if (s) { s.status = 'rejected'; }
+  closeModal(); renderSubjectTable();
+  alert(`❌ ${s.name} 已驳回，3年内不可重新入库。`);
+}
+
+function showAddSubjectModal() {
+  document.getElementById('modal-title').textContent = '📝 新增投保主体';
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:grid;gap:10px;">
+      <div><label style="font-size:12px;color:var(--muted);">主体名称</label><input id="f-name" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="例如：从化XX蔬菜合作社"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="font-size:12px;color:var(--muted);">类型</label><select id="f-type" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"><option>合作社</option><option>企业</option><option>家庭农场</option><option>农户</option><option>集体经济组织</option></select></div>
+        <div><label style="font-size:12px;color:var(--muted);">品种</label><select id="f-product" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"><option>蔬菜</option><option>荔枝</option><option>生猪</option><option>水产</option></select></div>
+      </div>
+      <div><label style="font-size:12px;color:var(--muted);">所在地</label><select id="f-region" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"><option>广州从化</option><option>佛山三水</option><option>江门新会</option><option>惠州博罗</option><option>肇庆高要</option></select></div>
+      <div><label style="font-size:12px;color:var(--muted);">简介</label><textarea id="f-desc" rows="2" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;resize:vertical;"></textarea></div>
+    </div>
+  `;
+  document.getElementById('modal-footer').innerHTML = `
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary btn-sm" onclick="submitNewSubject()">提交入库申请</button>
+  `;
+  document.getElementById('modal').classList.add('show');
+}
+
+function submitNewSubject() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('请填写主体名称'); return; }
+  const newId = 'S' + String(SUBJECTS.length + 1).padStart(3, '0');
+  SUBJECTS.push({
+    id: newId,
+    name,
+    type: document.getElementById('f-type').value,
+    product: document.getElementById('f-product').value,
+    region: document.getElementById('f-region').value,
+    riskScore: 70,
+    riskLevel: 'mid',
+    status: 'pending',
+    dimensions: { inputs:70, passRate:70, env:70, mgmt:60, scale:70 },
+    desc: document.getElementById('f-desc').value || '新增主体，待完善资料。'
+  });
+  closeModal();
+  renderSubjectTable();
+  alert(`✅ ${name} 已提交入库申请，请等待审核。`);
+}
+
+// ============================================================
+// M2: Risk Assessment
+// ============================================================
+function renderRiskTable() {
+  const filter = document.getElementById('risk-filter').value;
+  const filtered = SUBJECTS.filter(s => {
+    if (filter === 'all') return true;
+    return s.riskLevel === filter;
+  });
+
+  const tbody = document.getElementById('risk-table-body');
+  tbody.innerHTML = filtered.map(s => {
+    const rl = riskLevelMap[s.riskLevel];
+    const cls = s.riskLevel === 'high' ? 'red' : s.riskLevel === 'mid' ? 'orange' : 'green';
+    return `<tr class="clickable" onclick="showRiskDetail('${s.id}')">
+      <td><strong>${s.name}</strong></td>
+      <td>${s.product}</td>
+      <td><strong>${s.riskScore}</strong></td>
+      <td><span class="tag tag-${cls}">${rl}</span></td>
+      <td>${s.dimensions.inputs}</td>
+      <td>${s.dimensions.passRate}%</td>
+      <td>${s.dimensions.env}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showRiskDetail('${s.id}')">报告</button></td>
+    </tr>`;
+  }).join('');
+
+  updateRiskStats();
+  updateRiskCharts();
+}
+
+function updateRiskStats() {
+  const actives = SUBJECTS.filter(s => s.status === 'active');
+  document.getElementById('m2-low').textContent = actives.filter(s => s.riskLevel === 'low').length;
+  document.getElementById('m2-mid').textContent = actives.filter(s => s.riskLevel === 'mid').length;
+  document.getElementById('m2-high').textContent = actives.filter(s => s.riskLevel === 'high').length;
+  const avg = actives.length ? Math.round(actives.reduce((a,s) => a+s.riskScore, 0) / actives.length) : 0;
+  document.getElementById('m2-avg').textContent = avg;
+}
+
+function updateRiskCharts() {
+  const actives = SUBJECTS.filter(s => s.status === 'active');
+  // Risk distribution
+  const low = actives.filter(s => s.riskLevel === 'low').length;
+  const mid = actives.filter(s => s.riskLevel === 'mid').length;
+  const high = actives.filter(s => s.riskLevel === 'high').length;
+
+  if (riskDistChart) riskDistChart.destroy();
+  riskDistChart = new Chart(document.getElementById('riskDistChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['低风险 🟢', '中风险 🟡', '高风险 🔴'],
+      datasets: [{ data: [low, mid, high], backgroundColor: ['#188038', '#e37400', '#d93025'] }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  // Product risk
+  const products = ['蔬菜', '荔枝', '生猪', '水产'];
+  const prodAvgs = products.map(p => {
+    const arr = actives.filter(s => s.product === p);
+    return arr.length ? Math.round(arr.reduce((a,s) => a+s.riskScore, 0) / arr.length) : 0;
+  });
+
+  if (riskProductChart) riskProductChart.destroy();
+  riskProductChart = new Chart(document.getElementById('riskProductChart'), {
+    type: 'bar',
+    data: { labels: products, datasets: [{ data: prodAvgs, backgroundColor: ['#1a73e8','#e37400','#d93025','#188038'] }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function showRiskDetail(id) {
+  const s = SUBJECTS.find(x => x.id === id);
+  if (!s) return;
+  const rl = riskLevelMap[s.riskLevel];
+  document.getElementById('modal-title').textContent = `📊 风险评估报告 · ${s.name}`;
+
+  const riskGradeStr = s.riskLevel === 'low' ? '良好' : s.riskLevel === 'mid' ? '关注' : '危险';
+  const scoreRingCls = s.riskLevel === 'low' ? 'green' : s.riskLevel === 'mid' ? 'orange' : 'red';
+
+  const bars = Object.entries(s.dimensions).map(([k,v]) => {
+    const barCls = v >= 80 ? 'var(--success)' : v >= 60 ? 'var(--warning)' : 'var(--danger)';
+    return `<div class="bar-group">
+      <div class="bar-label"><span>${typeMap[k]}</span><span>${v}分</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${v}%;background:${barCls};"></div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <div style="text-align:center;">
+      <div class="score-ring ${scoreRingCls}"><div class="num">${s.riskScore}</div><div class="lbl">${riskGradeStr}</div></div>
+      <p style="font-size:13px;color:var(--muted);">${s.name} · ${s.product}<br>${rl}</p>
+    </div>
+    <div style="margin-top:12px;">${bars}</div>
+    <div style="margin-top:12px;background:var(--bg);padding:12px;border-radius:6px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">📋 风险控制建议</div>
+      <div style="font-size:13px;">
+        ${s.riskLevel === 'high' 
+          ? '建议立即启动重点监控，每月检测1次+飞行抽检。加强生产管理培训，建立完善的农事记录制度。'
+          : s.riskLevel === 'mid'
+          ? '建议每季度检测1次，重点关注投入品使用规范。完善生产记录可追溯体系。'
+          : '继续保持当前管理标准，每半年检测1次。建议探索品牌增值服务。'}
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-footer').innerHTML = `<button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button>`;
+  document.getElementById('modal').classList.add('show');
+}
+
+// ============================================================
+// M3: Monitoring & Alerts
+// ============================================================
+function renderAlerts() {
+  const container = document.getElementById('alert-list');
+  if (alerts.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>暂无预警，一切正常</p></div>';
+    updateAlertStats();
+    updateTrendChart();
+    return;
+  }
+  container.innerHTML = alerts.map((a,i) => {
+    const levelMap = { 1:'🔴 一级预警', 2:'🟠 二级预警', 3:'🟡 三级预警' };
+    const colorMap = { 1:'alert-red', 2:'alert-orange', 3:'alert-yellow' };
+    return `<div class="alert ${colorMap[a.level]}">
+      <div>
+        <strong>${levelMap[a.level]}</strong><br>
+        <span>${a.subject} · ${a.product} · ${a.item}: ${a.value}（标准≤${a.limit}）</span><br>
+        <span style="font-size:12px;color:var(--muted);">${a.note}</span>
+      </div>
+      <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <span class="alert-time">${a.time}</span>
+        <span>
+          <button class="btn btn-sm" style="background:var(--primary);color:white;padding:2px 8px;" onclick="processAlert(${i})">处理</button>
+          <button class="btn btn-sm btn-outline" style="padding:2px 6px;" onclick="dismissAlert(${i})">×</button>
+        </span>
+      </span>
+    </div>`;
+  }).join('');
+  updateAlertStats();
+  updateTrendChart();
+}
+
+function updateAlertStats() {
+  document.getElementById('m3-l1').textContent = alerts.filter(a => a.level === 1).length;
+  document.getElementById('m3-l2').textContent = alerts.filter(a => a.level === 2).length;
+  document.getElementById('m3-l3').textContent = alerts.filter(a => a.level === 3).length;
+  document.getElementById('m3-tests').textContent = testLogs.length;
+}
+
+function dismissAlert(idx) {
+  alerts.splice(idx, 1);
+  renderAlerts();
+}
+
+function processAlert(idx) {
+  const a = alerts[idx];
+  document.getElementById('modal-title').textContent = `🚨 处理预警`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="k">主体</div><div class="v">${a.subject}</div></div>
+      <div class="detail-item"><div class="k">品种</div><div class="v">${a.product}</div></div>
+      <div class="detail-item"><div class="k">检测项目</div><div class="v">${a.item}</div></div>
+      <div class="detail-item"><div class="k">检测值</div><div class="v">${a.value}</div></div>
+      <div class="detail-item"><div class="k">标准限值</div><div class="v">${a.limit}</div></div>
+      <div class="detail-item"><div class="k">风险说明</div><div class="v">${a.note}</div></div>
+    </div>
+    <h4 style="margin:16px 0 10px;font-size:14px;">建议处理措施</h4>
+    <div style="background:#e8f0fe;padding:12px;border-radius:6px;font-size:13px;">
+      ${a.level === 1 
+        ? '🔴 立即封存产品 → 通知农业农村部门 → 启动召回程序 → 无害化处理 → 预备理赔'
+        : a.level === 2
+        ? '🟠 暂停出货建议 → 加强休药期管理 → 7日后复检 → 排查投入品记录'
+        : '🟡 提醒主体加强管理 → 增加检测频率 → 关注趋势变化'}
+    </div>
+  `;
+  document.getElementById('modal-footer').innerHTML = `
+    <button class="btn btn-success btn-sm" onclick="dismissAlert(${idx});closeModal();alert('✅ 预警已处理，闭环完成。')">✅ 标记已处理</button>
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button>
+  `;
+  document.getElementById('modal').classList.add('show');
+}
+
+function simulateAlert() {
+  const subjects = SUBJECTS.filter(s => s.status === 'active');
+  if (subjects.length === 0) return;
+  const s = subjects[Math.floor(Math.random() * subjects.length)];
+  const items = ['毒死蜱','甲胺磷','吡虫啉','磺胺类','孔雀石绿','克百威','氧乐果','瘦肉精'];
+  const item = items[Math.floor(Math.random() * items.length)];
+  const value = (Math.random() * 2.5 + 0.5).toFixed(2);
+  const limit = (Math.random() * 2 + 1).toFixed(1);
+  const overRatio = parseFloat(value) / parseFloat(limit);
+  const level = overRatio >= 1.5 ? 1 : overRatio >= 1.0 ? 2 : 3;
+
+  const now = new Date();
+  const timeStr = now.toISOString().slice(0,10) + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+  const passResult = level === 3 ? 'pass' : 'fail';
+
+  const notes = {
+    1: `超标 ${(overRatio*100).toFixed(0)}%，需立即处置！`,
+    2: `超标 ${(overRatio*100).toFixed(0)}%，需要加强管理`,
+    3: `接近限值${(overRatio*100).toFixed(0)}%，呈上升趋势`
+  };
+
+  alerts.unshift({ level, subject: s.name, product: s.product, item, value: value + (item.includes('类')||item==='瘦肉精'?' μg/kg':' mg/kg'), limit: limit + (item.includes('类')||item==='瘦肉精'?' μg/kg':' mg/kg'), note: notes[level], time: timeStr });
+  testLogs.unshift({ time: timeStr, subject: s.name, prod: s.product, item, value: value + (item.includes('类')||item==='瘦肉精'?' μg/kg':' mg/kg'), limit: limit + (item.includes('类')||item==='瘦肉精'?' μg/kg':' mg/kg'), result: passResult });
+
+  renderAlerts();
+  renderTestTable();
+
+  if (level === 1) {
+    alert(`🔴 一级预警！\n${s.name} 的 ${s.product} 检出 ${item} ${(overRatio*100).toFixed(0)}% 超标！`);
+  } else if (level === 2) {
+    alert(`🟠 二级预警\n${s.name} · ${s.product} · ${item} 需关注处理。`);
+  }
+}
+
+function renderTestTable() {
+  const tbody = document.getElementById('test-data-table');
+  tbody.innerHTML = testLogs.slice(0,15).map(t => {
+    const cls = t.result === 'pass' ? 'tag-green' : 'tag-red';
+    const lbl = t.result === 'pass' ? '✅ 合格' : '❌ 不合格';
+    return `<tr><td>${t.time}</td><td>${t.subject}</td><td>${t.prod}</td><td>${t.item}</td><td>${t.value}</td><td>${t.limit}</td><td><span class="tag ${cls}">${lbl}</span></td></tr>`;
+  }).join('');
+}
+
+function updateTrendChart() {
+  const ctx = document.getElementById('trendChart');
+  if (!ctx) return;
+  const days = ['7/1','7/2','7/3','7/4'];
+  const data = [12,8,15,alerts.length];
+
+  if (trendChart) { trendChart.destroy(); }
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: days,
+      datasets: [{
+        label: '预警数量',
+        data: data,
+        borderColor: '#d93025',
+        backgroundColor: 'rgba(217,48,37,.1)',
+        fill: true,
+        tension: .3,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 5 } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+// ============================================================
+// Navigation
+// ============================================================
+function switchModule(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+// ============================================================
+// Init
+// ============================================================
+renderSubjectTable();
+renderRiskTable();
+renderAlerts();
+renderTestTable();
+updateAlertStats();
+updateTrendChart();
+</script>
 </body>
 </html>
