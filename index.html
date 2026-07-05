@@ -198,14 +198,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans S
 
 <div class="header">
   <h1>🌾 知田心安</h1>
-  <span class="badge">v0.0.2</span>
-  <span class="subtitle">农安险 AI 管理</span>
+  <span class="badge">v0.0.3</span>
+  <span class="subtitle">飞书原生 · 农安险 AI 管理</span>
 </div>
 
+<div style="background:linear-gradient(135deg,#e8f0fe,#d2e3fc);padding:8px 14px;font-size:12px;color:#1557b0;text-align:center;border-bottom:1px solid #c6dafc;">📢 本系统已迁移至飞书原生平台运行。下方为 Demo 演示，实时数据 → <a href="#" onclick="switchTab('tab4',document.getElementById('tab4-btn'))" style="color:#1a73e8;font-weight:600;">飞书工具</a></div>
 <div class="tab-nav">
   <button class="active" onclick="switchTab('tab1',this)">📋 主体库</button>
   <button onclick="switchTab('tab2',this)">📊 风险评估</button>
   <button onclick="switchTab('tab3',this)">🚨 监测预警</button>
+  <button id="tab4-btn" onclick="switchTab('tab4',this)">🔗 飞书工具</button>
 </div>
 
 <!-- ════════════════ TAB 1: 主体库 ════════════════ -->
@@ -282,6 +284,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans S
     <div class="card">
       <div class="card-header">⚡ 最新检测</div>
       <div class="card-body" style="padding:0;" id="test-feed"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TAB 4: 飞书工具 ════════════════ -->
+<div id="tab4" class="tab-content">
+  <div class="card" style="border-left:4px solid var(--primary);">
+    <div class="card-title">🎯 飞书原生工作台</div>
+    <div class="card-body" style="font-size:14px;line-height:1.8;">
+      <p>所有数据实时存储在飞书平台。三群 + 日历 + 表格协作运转。</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">📊 数据表格</div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+      <a href="https://my.feishu.cn/sheets/C4fRsx7jBhivFgteChucQNXlnPg" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none;justify-content:flex-start;">📋 投保主体库 → 10 主体 · 5 维评估</a>
+      <a href="https://my.feishu.cn/sheets/LLN9siZgHhyGACtHfWDcq3dGnxb" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none;justify-content:flex-start;">🧪 检测记录库 → 农残检测数据</a>
+      <a href="https://my.feishu.cn/sheets/CEjJsFOA2husfFtGUKGcbUU6nDc" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none;justify-content:flex-start;">🚨 预警清单 → 超标预警追踪</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">📖 操作文档</div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+      <a href="https://my.feishu.cn/docx/JGh7d21Kso034Kxg29GcS8TZn4f" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none;justify-content:flex-start;">📋 数据上报规范与操作手册</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">🏗️ 架构说明</div>
+    <div class="card-body" style="font-size:13px;line-height:1.8;">
+      <p><strong>群 1 · 设计指挥</strong> — 管理员与 AI 对话，设计、查询、操作</p>
+      <p><strong>群 2 · 数据采集</strong> — 基地人员按标准格式上报检测数据</p>
+      <p><strong>群 3 · 通知调度</strong> — 日历编排检测 + 预警推送</p>
+      <p style="margin-top:8px;color:var(--muted);">📅 飞书日历管理农残检测排期，超标自动触发预警</p>
     </div>
   </div>
 </div>
